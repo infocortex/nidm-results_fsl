@@ -131,6 +131,43 @@ class ContrastMap(NIDMObject):
             (PROV['label'], "Contrast Map: "+self.name)))        
         return self.p
 
+class ContrastExtraSumSquaresMap(NIDMObject):
+    """
+    Object representing a ContrastExtraSumSquaresMap entity.
+    """   
+    def __init__(self, contrast_file, contrast_num, contrast_name, 
+        coordinate_system, coordinate_space_id, export_dir):
+        super(ContrastMap, self).__init__(export_dir)
+        self.file = contrast_file
+        self.num = contrast_num
+        self.name = contrast_name
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.coord_space = CoordinateSpace(coordinate_system, 
+            coordinate_space_id, self.file)
+
+    def export(self):
+        """
+        Create prov graph.
+        """
+        # Copy extra sum of squares map in export directory
+        ess_file = os.path.join(self.export_dir, 'Contrast.nii.gz')
+        ess_orig_filename, ess_filename = self.copy_nifti(self.file, 
+            ess_file)
+
+        # Contrast Map entity
+        path, filename = os.path.split(cope_file)
+        self.p.entity(self.id, other_attributes=( 
+            (PROV['type'], NIDM['ContrastExtraSumOfSquaresMap']), 
+            (DCT['format'], "image/nifti"), 
+            (NIDM['inCoordinateSpace'], self.coord_space.id),
+            (PROV['location'], Identifier("file://./"+cope_filename)),
+            (NIDM['filename'], ess_orig_filename),
+            (NIDM['filename'], ess_filename),
+            (NIDM['contrastName'], self.name),
+            (CRYPTO['sha512'], self.get_sha_sum(cope_file)),
+            (PROV['label'], "Extra Sum of Squares Map: "+self.name)))        
+        return self.p
+
 
 class ContrastStdErrMap(NIDMObject):
     """

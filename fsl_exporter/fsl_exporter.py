@@ -126,6 +126,7 @@ class FSLtoNIDMExporter(NIDMExporter, object):
         exc_sets = glob.glob(os.path.join(self.feat_dir, 'thresh_z*.nii.gz'))
 
         contrasts = dict()
+
         for filename in exc_sets:
             s = re.compile('zf?stat\d+')
             zstatnum = s.search(filename)
@@ -191,22 +192,32 @@ class FSLtoNIDMExporter(NIDMExporter, object):
             # Convert to immutable tuple to be used as key
             pe_ids = tuple(pe_ids)
 
-            # Contrast Map
-            con_file = os.path.join(self.feat_dir, 
-                'stats', 'cope'+str(con_num)+'.nii.gz')
-            contrast_map = ContrastMap(con_file, stat_num, 
-                contrast_name, self.coordinate_system, 
-                self.coordinate_space_id, self.export_dir)
-            self.coordinate_space_id += 1
+            if stat_type is "T":
+                # Contrast Map
+                con_file = os.path.join(self.feat_dir, 
+                    'stats', 'cope'+str(con_num)+'.nii.gz')
+                contrast_map = ContrastMap(con_file, stat_num, 
+                    contrast_name, self.coordinate_system, 
+                    self.coordinate_space_id, self.export_dir)
+                self.coordinate_space_id += 1
 
-            # Contrast Variance and Standard Error Maps
-            varcontrast_file = os.path.join(self.feat_dir, 
-                'stats', 'varcope'+str(con_num)+'.nii.gz')
-            is_variance = True
-            std_err_map = ContrastStdErrMap(stat_num, 
-                varcontrast_file, is_variance, self.coordinate_system, 
-                self.coordinate_space_id, self.export_dir)
-            self.coordinate_space_id += 2
+                # Contrast Variance and Standard Error Maps
+                varcontrast_file = os.path.join(self.feat_dir, 
+                    'stats', 'varcope'+str(con_num)+'.nii.gz')
+                is_variance = True
+                std_err_map = ContrastStdErrMap(stat_num, 
+                    varcontrast_file, is_variance, self.coordinate_system, 
+                    self.coordinate_space_id, self.export_dir)
+                self.coordinate_space_id += 2
+            elif stat_type is "F":
+                # FIXME: this should be replaced by actual ESS file
+                ess_file = os.path.join(self.feat_dir, 
+                    'stats', 'cope'+str(con_num)+'.nii.gz')
+                ContrastExtraSumSquaresMap(ess_file, con_num, contrast_name, 
+                    self.coordinate_system, self.coordinate_space_id, self.export_dir)
+                self.coordinate_space_id += 1
+            else:
+                raise Exception("Unknown statistic type: "+stat_type)
 
             # Statistic Map
             stat_file = os.path.join(self.feat_dir, 
