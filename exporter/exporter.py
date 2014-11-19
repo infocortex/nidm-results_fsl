@@ -149,7 +149,8 @@ class NIDMExporter():
         software_uc = self.software.name.upper()
 
         bundle_id = NIIRI[str(uuid.uuid4())]
-        self.bundle = ProvBundle(identifier=bundle_id)
+        # self.bundle = ProvBundle(identifier=bundle_id)
+        self.bundle = ProvDocument()
 
         self.doc.entity(bundle_id, 
             other_attributes=( (PROV['type'], PROV['Bundle'],), 
@@ -183,7 +184,8 @@ class NIDMExporter():
         """
         Write-out provn serialisation to nidm.provn.
         """
-        self.doc.add_bundle(self.bundle)
+        # self.doc.add_bundle(self.bundle)
+        self.doc.update(self.bundle)
         provn_file = os.path.join(self.export_dir, 'nidm.provn')
         provn_fid = open(provn_file, 'w');
         # FIXME None
